@@ -1,28 +1,69 @@
-# Create T3 App
+# Telecommunication Services Price Calculator
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+This project aims to create a price calculator for a telecommunications company's services. The goal is to build an application view that allows users to check the prices of services they would like to order.
 
-## What's next? How do I make an app with this?
+## Requirements
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+The price should be calculated when the user adds selected services to the list and chooses the year in which they would apply. The calculator should have a price list declaration for the years 2023, 2024, and 2025, allowing customers to modify it by adding additional years and services.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+### List of Services
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+- Internet
+- Television
+- Phone Subscription
+- 4K Decoder
 
-## Learn More
+Service prices may vary depending on the selected year. The current prices are as follows:
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+- Internet costs 39 PLN in 2023, 49 PLN in 2024, and 59 PLN in 2025.
+- Television costs 49 PLN in 2023, 49 PLN in 2024, and 59 PLN in 2025.
+- The "Internet + Television" package costs less - 79 PLN in 2023, 89 PLN in 2024, and 99 PLN in 2025.
+- The "Internet + Phone Subscription" package costs 64 PLN in each year.
+- Phone Subscription costs 29 PLN.
+- 4K Decoder costs 29 PLN, but it is available for free in the "Internet + Television" package.
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+It doesn't make sense for a customer to order a "4K Decoder" without ordering television.
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+Ensure that the program calculates the most favorable solution for the customer, and no discount applies twice.
 
-## How do I deploy this?
+The application view should allow users to select services from the list, add them to a list, and calculate the final price of the selected services.
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## Technology
+
+This application is built using React, a JavaScript library for building user interfaces. The code should follow best programming practices, ensuring high code cleanliness and maintainability.
+
+## Installation
+
+To run the Telecommunication Services Price Calculator locally, follow these steps:
+
+1. Clone the repository:
+```shell
+git clone https://github.com/ichmowgli/sp-next.git
+```
+
+2. Navigate to the project directory:
+```shell
+cd sp-next
+```
+
+3. Install the dependencies:
+```shell
+npm install
+```
+
+4. Start the development server:
+```shell
+npm start
+```
+
+5. Open your browser and visit `http://localhost:3000` to access the application.
+
+## Usage
+
+Upon opening the application, you will be presented with a list of services. Select the desired services, choose the year, and add them to the list. The calculator will display the final price of the selected services.
+
+To modify the price list for different years or add new services, please refer to the codebase and follow the instructions provided in the relevant files.
+
+## License
+
+This project is licensed under the MIT License. Feel free to modify and distribute it as needed.
