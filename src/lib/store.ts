@@ -4,12 +4,12 @@ import { create } from "zustand";
 import { type BUNDLES, PRICES, DEFAULT_YEAR } from "./constants";
 
 export type Store = {
-  selectedYear: number;
+  selectedYear: keyof typeof PRICES;
   selectedItems: Record<keyof typeof BUNDLES, string[]>;
   selectedBundle: keyof typeof BUNDLES | null;
   selectBundle: (bundle: keyof typeof BUNDLES) => void;
   totalPrice: (bundle: keyof typeof BUNDLES) => number;
-  selectYear: (year: number) => void;
+  selectYear: (year: keyof typeof PRICES) => void;
 
   isSelected: (bundle: keyof typeof BUNDLES, item: string) => boolean;
 
@@ -39,12 +39,9 @@ export const useCalcStore = create<Store>((set, get) => ({
       return;
     }
 
-    return set((state) => ({
-      selectedItems: {
-        ...state.selectedItems,
-        [bundle]: state.selectedItems[bundle].concat(item),
-      },
-    }));
+    const selectedItems = get().selectedItems;
+    selectedItems[bundle].push(item);
+    return set({ selectedItems });
   },
 
   removeService: (bundle, item) => {
@@ -54,14 +51,12 @@ export const useCalcStore = create<Store>((set, get) => ({
       toRemove.push("decoder");
     }
 
-    return set((state) => ({
-      selectedItems: {
-        ...state.selectedItems,
-        [bundle]: state.selectedItems[bundle].filter(
-          (i) => !toRemove.includes(i)
-        ),
-      },
-    }));
+    const selectedItems = get().selectedItems;
+    selectedItems[bundle] = selectedItems[bundle].filter(
+      (i) => !toRemove.includes(i)
+    );
+
+    return set({ selectedItems });
   },
 
   canAdd: (bundle, item) => {
@@ -78,13 +73,19 @@ export const useCalcStore = create<Store>((set, get) => ({
     );
   },
 
-  totalPrice: (bundle) =>
-    get().selectedItems[bundle].reduce<number>((acc: number, item: string) => {
-      const selectedYear = get().selectedYear;
-      const pricesForThisYear = PRICES[selectedYear as keyof typeof PRICES];
-      const p = pricesForThisYear[item as keyof typeof pricesForThisYear];
-      return acc + p;
-    }, 0),
+  totalPrice: (bundle) => {
+    const selectedYear = get().selectedYear;
+    const pricesForThisYear = PRICES[selectedYear];
+    const bundlePrice = bundle !== "noBundle" ? pricesForThisYear[bundle] : 0;
 
-  selectYear: (year: number) => set({ selectedYear: year }),
+    return get().selectedItems[bundle].reduce<number>(
+      (acc: number, item: string) => {
+        const p = pricesForThisYear[item as keyof typeof pricesForThisYear];
+        return acc + p;
+      },
+      bundlePrice
+    );
+  },
+
+  selectYear: (year) => set({ selectedYear: year}),
 }));
