@@ -5,7 +5,7 @@ export const LABELS = {
   internetAndPhone: "Internet + Phone",
   phone: "Phone",
   decoder: "TV Decoder",
-  noBundle: "No Bundle",
+  noBundle: "I don't want one",
 } as const;
 
 export const BUNDLES = {
