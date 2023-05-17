@@ -37,21 +37,25 @@ This application is built using React, a JavaScript library for building user in
 To run the Telecommunication Services Price Calculator locally, follow these steps:
 
 1. Clone the repository:
+
 ```shell
 git clone https://github.com/ichmowgli/sp-next.git
 ```
 
 2. Navigate to the project directory:
+
 ```shell
 cd sp-next
 ```
 
 3. Install the dependencies:
+
 ```shell
 npm install
 ```
 
 4. Start the development server:
+
 ```shell
 npm start
 ```

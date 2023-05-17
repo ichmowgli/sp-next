@@ -6,7 +6,7 @@ import { type BUNDLES, PRICES, DEFAULT_YEAR } from "./constants";
 export type Store = {
   selectedYear: keyof typeof PRICES;
   selectedItems: Record<keyof typeof BUNDLES, string[]>;
-  selectedBundle: keyof typeof BUNDLES | null;
+  selectedBundle: keyof typeof BUNDLES;
   selectBundle: (bundle: keyof typeof BUNDLES) => void;
   totalPrice: (bundle: keyof typeof BUNDLES) => number;
   selectYear: (year: keyof typeof PRICES) => void;
@@ -26,7 +26,7 @@ export const useCalcStore = create<Store>((set, get) => ({
     noBundle: [],
   },
   selectedYear: DEFAULT_YEAR,
-  selectedBundle: null,
+  selectedBundle: "noBundle",
 
   selectBundle: (bundle) => set({ selectedBundle: bundle }),
 
@@ -87,5 +87,5 @@ export const useCalcStore = create<Store>((set, get) => ({
     );
   },
 
-  selectYear: (year) => set({ selectedYear: year}),
+  selectYear: (year) => set({ selectedYear: year }),
 }));
