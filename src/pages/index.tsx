@@ -33,7 +33,7 @@ const FlowStep = ({
         <span className="toggle-group-number">{title_number}</span>
         <h2 className="toggle-group-title">{title}</h2>
       </div>
-      <div className="sm:ml-10	md:ml-[6.5rem]">{children}</div>
+      <div className="sm:ml-6	md:ml-0 lg:ml-10">{children}</div>
     </div>
   );
 };
@@ -114,7 +114,7 @@ const AddOns = ({ bundle }: { bundle: BundlesEnum }) => {
       {BUNDLES[bundle].items.map((item) => (
         <div
           key={`container-switch-${item}`}
-          className="flex items-center space-x-2 "
+          className="flex items-center space-x-2 space-y-2 "
         >
           <Tooltip>
             {item == "decoder" && !store.canAdd(bundle, item) ? (
@@ -130,7 +130,7 @@ const AddOns = ({ bundle }: { bundle: BundlesEnum }) => {
           </Tooltip>
           <Label
             htmlFor={`switch-${item}`}
-            className="font-regular text-sm md:text-xl xl:text-2xl"
+            className="font-regular text-sm md:text-lg xl:text-xl"
           >
             {LABELS[item]} (+{" "}
             {currencyFormatter.format(PRICES[store.selectedYear][item])}/mo)
@@ -150,7 +150,7 @@ const Offer = ({
 
   const selectedItems = store.selectedItems[store.selectedBundle];
   return (
-    <div className="font-regular text-sm md:text-xl xl:text-2xl">
+    <div className="font-regular text-sm md:text-lg xl:text-xl">
       <p>Year: {store.selectedYear}</p>
       <p>Bundle: {LABELS[store.selectedBundle]}</p>
       <p>
@@ -161,7 +161,7 @@ const Offer = ({
             .join(", ")
           : "None"}
       </p>
-      <h3 className="mt-2 text-xl font-bold md:text-2xl">
+      <h3 className="mt-4 text-xl font-bold md:text-2xl">
         Total price: {currencyFormatter.format(store.totalPrice(bundle))}/mo
       </h3>
     </div>
@@ -180,7 +180,7 @@ const Home: NextPage = () => {
       </Head>
 
       <TooltipProvider>
-        <main className="mx-5 sm:mx-10">
+        <main className="container mt-20">
           <FlowStep title_number={1} title={"Select a year"}>
             <ToggleYear year={store.selectedYear} />
           </FlowStep>
