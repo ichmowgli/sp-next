@@ -8,14 +8,20 @@ export const LABELS = {
   noBundle: "I don't want one",
 } as const;
 
+export enum BundlesEnum {
+  internetAndTv = "internetAndTv",
+  internetAndPhone = "internetAndPhone",
+  noBundle = "noBundle",
+}
+
 export const BUNDLES = {
-  internetAndTv: {
+  [BundlesEnum.internetAndTv]: {
     items: ["phone", "decoder"],
   },
-  internetAndPhone: {
+  [BundlesEnum.internetAndPhone]: {
     items: ["tv", "decoder"],
   },
-  noBundle: { items: ["internet", "tv", "decoder", "phone"] },
+  [BundlesEnum.noBundle]: { items: ["internet", "tv", "decoder", "phone"] },
 } as const;
 
 export const PRICES = {

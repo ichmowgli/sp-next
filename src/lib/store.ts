@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { create } from "zustand";
-import { type BUNDLES, PRICES, DEFAULT_YEAR } from "./constants";
+import { PRICES, DEFAULT_YEAR, BundlesEnum } from "./constants";
 
 export type Store = {
   selectedYear: keyof typeof PRICES;
-  selectedItems: Record<keyof typeof BUNDLES, string[]>;
-  selectedBundle: keyof typeof BUNDLES;
-  selectBundle: (bundle: keyof typeof BUNDLES) => void;
-  totalPrice: (bundle: keyof typeof BUNDLES) => number;
+  selectedItems: Record<BundlesEnum, string[]>;
+  selectedBundle: BundlesEnum;
+  selectBundle: (bundle: BundlesEnum) => void;
+  totalPrice: (bundle: BundlesEnum) => number;
   selectYear: (year: keyof typeof PRICES) => void;
 
-  isSelected: (bundle: keyof typeof BUNDLES, item: string) => boolean;
+  isSelected: (bundle: BundlesEnum, item: string) => boolean;
 
-  addService: (bundle: keyof typeof BUNDLES, item: string) => void;
-  removeService: (bundle: keyof typeof BUNDLES, item: string) => void;
-  canAdd: (bundle: keyof typeof BUNDLES, item: string) => boolean;
-  hasTVItem: (bundle: keyof typeof BUNDLES) => boolean;
+  addService: (bundle: BundlesEnum, item: string) => void;
+  removeService: (bundle: BundlesEnum, item: string) => void;
+  canAdd: (bundle: BundlesEnum, item: string) => boolean;
+  hasTVItem: (bundle: BundlesEnum) => boolean;
 };
 
 export const useCalcStore = create<Store>((set, get) => ({
@@ -26,7 +26,7 @@ export const useCalcStore = create<Store>((set, get) => ({
     noBundle: [],
   },
   selectedYear: DEFAULT_YEAR,
-  selectedBundle: "noBundle",
+  selectedBundle: BundlesEnum.noBundle,
 
   selectBundle: (bundle) => set({ selectedBundle: bundle }),
 

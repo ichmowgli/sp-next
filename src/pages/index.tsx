@@ -1,5 +1,4 @@
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
@@ -7,11 +6,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
-import { BUNDLES, LABELS, PRICES } from "@/lib/constants";
+import { BUNDLES, type BundlesEnum, LABELS, PRICES } from "@/lib/constants";
 import { useCalcStore } from "@/lib/store";
 import { type NextPage } from "next";
 import Head from "next/head";
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
+import dynamic from "next/dynamic";
 
 const currencyFormatter = new Intl.NumberFormat("pl", {
   style: "currency",
@@ -66,7 +66,7 @@ const ToggleYear = ({ year }: { year: keyof typeof PRICES }) => {
   );
 };
 
-const ToggleBundle = ({ bundle }: { bundle: keyof typeof BUNDLES }) => {
+const ToggleBundle = ({ bundle }: { bundle: BundlesEnum }) => {
   const store = useCalcStore();
 
   return (
@@ -77,7 +77,7 @@ const ToggleBundle = ({ bundle }: { bundle: keyof typeof BUNDLES }) => {
       defaultValue={bundle}
       aria-label="Text alignment"
       onValueChange={(bundle) =>
-        bundle && store.selectBundle(bundle as keyof typeof BUNDLES)
+        bundle && store.selectBundle(bundle as BundlesEnum)
       }
     >
       {Object.keys(BUNDLES).map((bundle) => (
@@ -87,10 +87,13 @@ const ToggleBundle = ({ bundle }: { bundle: keyof typeof BUNDLES }) => {
           aria-label="Left aligned"
           key={`toggle-${bundle}`}
         >
-          <p>{LABELS[bundle as keyof typeof BUNDLES]}</p>
+          <p>{LABELS[bundle as BundlesEnum]}</p>
           <p>
-            {/* @ts-ignore */}
-            {currencyFormatter.format(PRICES[store.selectedYear][bundle] ?? 0)}
+            {currencyFormatter.format(
+              // @ts-expect-error false-positive
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+              PRICES[store.selectedYear][bundle] ?? 0
+            )}
             /mo
           </p>
         </ToggleGroup.Item>
@@ -99,30 +102,11 @@ const ToggleBundle = ({ bundle }: { bundle: keyof typeof BUNDLES }) => {
   );
 };
 
-const ItemSwitch = ({
-  bundle,
-  item,
-}: {
-  bundle: keyof typeof BUNDLES;
-  item: string;
-}) => {
-  const store = useCalcStore();
+const ItemSwitch = dynamic(() => import("../components/Switch"), {
+  ssr: false,
+});
 
-  return (
-    <Switch
-      id={`switch-${item}`}
-      onCheckedChange={(checked) =>
-        checked
-          ? store.addService(bundle, item)
-          : store.removeService(bundle, item)
-      }
-      checked={store.isSelected(bundle, item)}
-      disabled={!store.canAdd(bundle, item)}
-    />
-  );
-};
-
-const AddOns = ({ bundle }: { bundle: keyof typeof BUNDLES }) => {
+const AddOns = ({ bundle }: { bundle: BundlesEnum }) => {
   const store = useCalcStore();
 
   return (
@@ -159,12 +143,8 @@ const AddOns = ({ bundle }: { bundle: keyof typeof BUNDLES }) => {
 
 const Offer = ({
   bundle,
-  year,
-  item = [],
 }: {
-  bundle: keyof typeof BUNDLES;
-  year: number;
-  item?: string[];
+  bundle: BundlesEnum;
 }) => {
   const store = useCalcStore();
 
@@ -177,8 +157,8 @@ const Offer = ({
         Add-Ons:{" "}
         {selectedItems.length
           ? selectedItems
-              .map((item) => LABELS[item as keyof typeof LABELS])
-              .join(", ")
+            .map((item) => LABELS[item as keyof typeof LABELS])
+            .join(", ")
           : "None"}
       </p>
       <h3 className="mt-2 text-xl font-bold md:text-2xl">
@@ -202,16 +182,16 @@ const Home: NextPage = () => {
       <TooltipProvider>
         <main className="mx-5 sm:mx-10">
           <FlowStep title_number={1} title={"Select a year"}>
-            <ToggleYear year={2023} />
+            <ToggleYear year={store.selectedYear} />
           </FlowStep>
           <FlowStep title_number={2} title={"Pick a bundle"}>
-            <ToggleBundle bundle={"noBundle"} />
+            <ToggleBundle bundle={store.selectedBundle} />
           </FlowStep>
           <FlowStep title_number={3} title={"Choose Add-ons"}>
             <AddOns bundle={store.selectedBundle} />
           </FlowStep>
           <FlowStep title_number={4} title={"Review your offer"}>
-            <Offer year={store.selectedYear} bundle={store.selectedBundle} />
+            <Offer bundle={store.selectedBundle} />
           </FlowStep>
         </main>
       </TooltipProvider>

@@ -7,11 +7,11 @@ export default function Document() {
         <link
           href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;300;400;500;600&display=swap"
           rel="stylesheet"
-        ></link>
+        />
       </Head>
-      <body>
+      < body >
         <Main />
-        <NextScript />
+        < NextScript />
       </body>
     </Html>
   );
