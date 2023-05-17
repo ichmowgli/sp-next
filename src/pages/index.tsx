@@ -141,11 +141,7 @@ const AddOns = ({ bundle }: { bundle: BundlesEnum }) => {
   );
 };
 
-const Offer = ({
-  bundle,
-}: {
-  bundle: BundlesEnum;
-}) => {
+const Offer = ({ bundle }: { bundle: BundlesEnum }) => {
   const store = useCalcStore();
 
   const selectedItems = store.selectedItems[store.selectedBundle];
@@ -157,8 +153,8 @@ const Offer = ({
         Add-Ons:{" "}
         {selectedItems.length
           ? selectedItems
-            .map((item) => LABELS[item as keyof typeof LABELS])
-            .join(", ")
+              .map((item) => LABELS[item as keyof typeof LABELS])
+              .join(", ")
           : "None"}
       </p>
       <h3 className="mt-4 text-xl font-bold md:text-2xl">
