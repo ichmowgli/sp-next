@@ -1,23 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { create } from "zustand";
-import {
-  PRICES,
-  DEFAULT_YEAR,
-  type BundlesEnum,
-  ServicesEnum,
-  BUNDLES,
-} from "./constants";
+import { DEFAULT_YEAR, BUNDLES } from "./constants";
+import { type BundlesEnum, type Prices, ServicesEnum } from "./types";
 
 export type Store = {
-  selectedYear: keyof typeof PRICES;
+  selectedYear: keyof Prices;
   selectedItems: ServicesEnum[];
+  prices: Prices | null;
+  saturatePrices: () => Promise<void>;
   totalPrice: () => number;
   getActiveBundle: () => BundlesEnum | null;
   getActiveBundlePrice: () => number;
   getActiveDiscount: () => number;
 
-  selectYear: (year: keyof typeof PRICES) => void;
+  selectYear: (year: keyof Prices) => void;
 
   isSelected: (item: ServicesEnum) => boolean;
 
@@ -30,6 +27,14 @@ export type Store = {
 export const useCalcStore = create<Store>((set, get) => ({
   selectedItems: [],
   selectedYear: DEFAULT_YEAR,
+  prices: null,
+  saturatePrices: () => {
+    return fetch("/api/prices")
+      .then((res) => res.json())
+      .then((res) => {
+        set({ prices: res });
+      });
+  },
 
   isSelected: (item) => {
     return get().selectedItems.includes(item);
@@ -77,7 +82,10 @@ export const useCalcStore = create<Store>((set, get) => ({
       return null;
     }
 
-    const pricesForYear = PRICES[get().selectedYear];
+    const prices = get().prices;
+    if (!prices) return null;
+
+    const pricesForYear = prices[get().selectedYear];
     if (!pricesForYear) return null;
 
     const sortedByPrice = possibleBundles.sort(
@@ -92,7 +100,10 @@ export const useCalcStore = create<Store>((set, get) => ({
     const bundle = get().getActiveBundle();
     if (!bundle) return 0;
 
-    const pricesForYear = PRICES[get().selectedYear];
+    const prices = get().prices;
+    if (!prices) return 0;
+
+    const pricesForYear = prices[get().selectedYear];
     if (!pricesForYear) return 0;
 
     const totalPriceWithoutBundle = get().selectedItems.reduce<number>(
@@ -109,7 +120,10 @@ export const useCalcStore = create<Store>((set, get) => ({
     const bundle = get().getActiveBundle();
     if (!bundle) return 0;
 
-    const pricesForYear = PRICES[get().selectedYear];
+    const prices = get().prices;
+    if (!prices) return 0;
+
+    const pricesForYear = prices[get().selectedYear];
     if (!pricesForYear) return 0;
 
     return pricesForYear[bundle];
@@ -117,7 +131,9 @@ export const useCalcStore = create<Store>((set, get) => ({
 
   totalPrice: () => {
     const selectedYear = get().selectedYear;
-    const pricesForThisYear = PRICES[selectedYear];
+    const prices = get().prices;
+    if (!prices) return 0;
+    const pricesForThisYear = prices[selectedYear];
 
     if (!pricesForThisYear) return 0;
 

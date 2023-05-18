@@ -78,12 +78,11 @@
     @apply bg-background;
     font-feature-settings: "rlig" 1, "calt" 1;
     font-family: "Montserrat";
-
   }
 }
 
 .toggle_item {
-  @apply relative bg-[#e2e8f0] mb-2 mr-4 min-h-full w-36 flex-none flex-col items-center rounded-3xl border-2 border-solid border-transparent p-3 text-xs hover:border-[rgb(192,197,206)] hover:shadow-[rgba(10,11,13,0.08)_0px_0px_1px,rgba(10,11,13,0.12)_0px_3px_4px] focus:z-10 focus:outline-none data-[state=on]:border-[#1a73ff] data-[state=on]:bg-[white] data-[state=on]:shadow-[rgba(10,11,13,0.05)_0px_1px_2px,rgba(10,11,13,0.12)_0px_5px_11px] sm:mb-0 sm:w-44 md:w-56 md:text-base xl:text-lg;
+  @apply relative mb-2 mr-4 min-h-full w-36 flex-none flex-col items-center rounded-3xl border-2 border-solid border-transparent bg-[#e2e8f0] p-3 text-xs hover:border-[rgb(192,197,206)] hover:shadow-[rgba(10,11,13,0.08)_0px_0px_1px,rgba(10,11,13,0.12)_0px_3px_4px] focus:z-10 focus:outline-none data-[state=on]:border-[#1a73ff] data-[state=on]:bg-[white] data-[state=on]:shadow-[rgba(10,11,13,0.05)_0px_1px_2px,rgba(10,11,13,0.12)_0px_5px_11px] sm:mb-0 sm:w-44 md:w-56 md:text-base xl:text-lg;
 }
 
 .toggle_group {

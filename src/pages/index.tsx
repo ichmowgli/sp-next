@@ -6,19 +6,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
-import {
-  BUNDLES,
-  type BundlesEnum,
-  LABELS,
-  PRICES,
-  SERVICES,
-  type ServicesEnum,
-} from "@/lib/constants";
 import { useCalcStore } from "@/lib/store";
 import { type NextPage } from "next";
 import Head from "next/head";
-import { type ReactNode } from "react";
+import { useEffect, type ReactNode, useState, Suspense } from "react";
 import dynamic from "next/dynamic";
+import { type Prices, type ServicesEnum } from "@/lib/types";
+import { SERVICES, LABELS } from "@/lib/constants";
 
 const ItemSwitch = dynamic(() => import("../components/Switch"), {
   ssr: false,
@@ -53,7 +47,7 @@ const FlowStep = ({
   );
 };
 
-const ToggleYear = ({ year }: { year: keyof typeof PRICES }) => {
+const ToggleYear = ({ year }: { year: keyof Prices }) => {
   const store = useCalcStore();
 
   return (
@@ -65,7 +59,7 @@ const ToggleYear = ({ year }: { year: keyof typeof PRICES }) => {
       aria-label="Text alignment"
       onValueChange={(year) => year && store.selectYear(Number(year))}
     >
-      {Object.keys(PRICES).map((year) => (
+      {Object.keys(store.prices || {}).map((year) => (
         <ToggleGroup.Item
           className="toggle_item"
           value={year}
@@ -106,7 +100,7 @@ const AddOns = () => {
             className="font-regular text-sm md:text-lg xl:text-xl"
           >
             {LABELS[item]} (+{" "}
-            {formatCurrency(PRICES[store.selectedYear]![item])}/mo)
+            {formatCurrency(store.prices![store.selectedYear]![item])}/mo)
           </Label>
         </div>
       ))}
@@ -139,6 +133,13 @@ const Offer = () => {
 
 const Home: NextPage = () => {
   const store = useCalcStore();
+  const [shouldLoad, setShouldLoad] = useState(!store.prices);
+
+  useEffect(() => {
+    if (shouldLoad) {
+      void store.saturatePrices().then(() => setShouldLoad(false));
+    }
+  }, []);
 
   return (
     <>
@@ -150,18 +151,21 @@ const Home: NextPage = () => {
 
       <TooltipProvider>
         <main className="container mt-20">
-          <FlowStep title_number={1} title={"Select a year"}>
-            <ToggleYear year={store.selectedYear} />
-          </FlowStep>
-          {/* <FlowStep title_number={2} title={"Pick a bundle"}>
-            <ToggleBundle bundle={store.selectedBundle} />
-          </FlowStep> */}
-          <FlowStep title_number={3} title={"Choose Add-ons"}>
-            <AddOns />
-          </FlowStep>
-          <FlowStep title_number={4} title={"Review your offer"}>
-            <Offer />
-          </FlowStep>
+          {shouldLoad ? (
+            <div className="text-center">Loading...</div>
+          ) : (
+            <>
+              <FlowStep title_number={1} title={"Select a year"}>
+                <ToggleYear year={store.selectedYear} />
+              </FlowStep>
+              <FlowStep title_number={3} title={"Choose Add-ons"}>
+                <AddOns />
+              </FlowStep>
+              <FlowStep title_number={4} title={"Review your offer"}>
+                <Offer />
+              </FlowStep>{" "}
+            </>
+          )}
         </main>
       </TooltipProvider>
     </>
