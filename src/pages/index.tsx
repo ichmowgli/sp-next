@@ -6,17 +6,32 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
-import { BUNDLES, type BundlesEnum, LABELS, PRICES } from "@/lib/constants";
+import {
+  BUNDLES,
+  type BundlesEnum,
+  LABELS,
+  PRICES,
+  SERVICES,
+  type ServicesEnum,
+} from "@/lib/constants";
 import { useCalcStore } from "@/lib/store";
 import { type NextPage } from "next";
 import Head from "next/head";
 import { type ReactNode } from "react";
 import dynamic from "next/dynamic";
 
+const ItemSwitch = dynamic(() => import("../components/Switch"), {
+  ssr: false,
+});
+
 const currencyFormatter = new Intl.NumberFormat("pl", {
   style: "currency",
   currency: "PLN",
 });
+
+const formatCurrency = (value: number | undefined | null) => {
+  return currencyFormatter.format(value ?? 0);
+};
 
 const FlowStep = ({
   title_number,
@@ -48,9 +63,7 @@ const ToggleYear = ({ year }: { year: keyof typeof PRICES }) => {
       type="single"
       defaultValue={year.toString()}
       aria-label="Text alignment"
-      onValueChange={(year) =>
-        year && store.selectYear(Number(year) as keyof typeof PRICES)
-      }
+      onValueChange={(year) => year && store.selectYear(Number(year))}
     >
       {Object.keys(PRICES).map((year) => (
         <ToggleGroup.Item
@@ -66,63 +79,23 @@ const ToggleYear = ({ year }: { year: keyof typeof PRICES }) => {
   );
 };
 
-const ToggleBundle = ({ bundle }: { bundle: BundlesEnum }) => {
-  const store = useCalcStore();
-
-  return (
-    <ToggleGroup.Root
-      className="toggle_group"
-      style={{ scrollBehavior: "smooth" }}
-      type="single"
-      defaultValue={bundle}
-      aria-label="Text alignment"
-      onValueChange={(bundle) =>
-        bundle && store.selectBundle(bundle as BundlesEnum)
-      }
-    >
-      {Object.keys(BUNDLES).map((bundle) => (
-        <ToggleGroup.Item
-          className="toggle_item"
-          value={bundle}
-          aria-label="Left aligned"
-          key={`toggle-${bundle}`}
-        >
-          <p>{LABELS[bundle as BundlesEnum]}</p>
-          <p>
-            {currencyFormatter.format(
-              // @ts-expect-error false-positive
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-              PRICES[store.selectedYear][bundle] ?? 0
-            )}
-            /mo
-          </p>
-        </ToggleGroup.Item>
-      ))}
-    </ToggleGroup.Root>
-  );
-};
-
-const ItemSwitch = dynamic(() => import("../components/Switch"), {
-  ssr: false,
-});
-
-const AddOns = ({ bundle }: { bundle: BundlesEnum }) => {
+const AddOns = () => {
   const store = useCalcStore();
 
   return (
     <>
-      {BUNDLES[bundle].items.map((item) => (
+      {SERVICES.map((item: ServicesEnum) => (
         <div
           key={`container-switch-${item}`}
           className="flex items-center space-x-2 space-y-2 "
         >
           <Tooltip>
-            {item == "decoder" && !store.canAdd(bundle, item) ? (
+            {item == "decoder" && !store.canAdd(item) ? (
               <TooltipTrigger>
-                <ItemSwitch bundle={bundle} item={item} />
+                <ItemSwitch item={item} />
               </TooltipTrigger>
             ) : (
-              <ItemSwitch bundle={bundle} item={item} />
+              <ItemSwitch item={item} />
             )}
             <TooltipContent>
               <p className="text-red-400">Can be added only with TV</p>
@@ -133,7 +106,7 @@ const AddOns = ({ bundle }: { bundle: BundlesEnum }) => {
             className="font-regular text-sm md:text-lg xl:text-xl"
           >
             {LABELS[item]} (+{" "}
-            {currencyFormatter.format(PRICES[store.selectedYear][item])}/mo)
+            {formatCurrency(PRICES[store.selectedYear]![item])}/mo)
           </Label>
         </div>
       ))}
@@ -141,24 +114,24 @@ const AddOns = ({ bundle }: { bundle: BundlesEnum }) => {
   );
 };
 
-const Offer = ({ bundle }: { bundle: BundlesEnum }) => {
+const Offer = () => {
   const store = useCalcStore();
 
-  const selectedItems = store.selectedItems[store.selectedBundle];
+  const activeDiscount = store.getActiveDiscount();
   return (
     <div className="font-regular text-sm md:text-lg xl:text-xl">
       <p>Year: {store.selectedYear}</p>
-      <p>Bundle: {LABELS[store.selectedBundle]}</p>
       <p>
         Add-Ons:{" "}
-        {selectedItems.length
-          ? selectedItems
-              .map((item) => LABELS[item as keyof typeof LABELS])
-              .join(", ")
+        {store.selectedItems.length
+          ? store.selectedItems.map((item) => LABELS[item]).join(", ")
           : "None"}
       </p>
+      {activeDiscount > 0 && (
+        <p>Your discount: {formatCurrency(activeDiscount)}/mo</p>
+      )}
       <h3 className="mt-4 text-xl font-bold md:text-2xl">
-        Total price: {currencyFormatter.format(store.totalPrice(bundle))}/mo
+        Total price: {formatCurrency(store.totalPrice())}/mo
       </h3>
     </div>
   );
@@ -180,14 +153,14 @@ const Home: NextPage = () => {
           <FlowStep title_number={1} title={"Select a year"}>
             <ToggleYear year={store.selectedYear} />
           </FlowStep>
-          <FlowStep title_number={2} title={"Pick a bundle"}>
+          {/* <FlowStep title_number={2} title={"Pick a bundle"}>
             <ToggleBundle bundle={store.selectedBundle} />
-          </FlowStep>
+          </FlowStep> */}
           <FlowStep title_number={3} title={"Choose Add-ons"}>
-            <AddOns bundle={store.selectedBundle} />
+            <AddOns />
           </FlowStep>
           <FlowStep title_number={4} title={"Review your offer"}>
-            <Offer bundle={store.selectedBundle} />
+            <Offer />
           </FlowStep>
         </main>
       </TooltipProvider>

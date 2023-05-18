@@ -1,26 +1,18 @@
-import { type BundlesEnum } from "@/lib/constants";
+import { type ServicesEnum } from "@/lib/constants";
 import { useCalcStore } from "@/lib/store";
 import { Switch } from "./ui/switch";
 
-export default function ItemSwitch({
-  bundle,
-  item,
-}: {
-  bundle: BundlesEnum;
-  item: string;
-}) {
+export default function ItemSwitch({ item }: { item: ServicesEnum }) {
   const store = useCalcStore();
 
   return (
     <Switch
       id={`switch-${item}`}
       onCheckedChange={(checked) =>
-        checked
-          ? store.addService(bundle, item)
-          : store.removeService(bundle, item)
+        checked ? store.addService(item) : store.removeService(item)
       }
-      checked={store.isSelected(bundle, item)}
-      disabled={!store.canAdd(bundle, item)}
+      checked={store.isSelected(item)}
+      disabled={!store.canAdd(item)}
     />
   );
 }

@@ -11,18 +11,25 @@ export const LABELS = {
 export enum BundlesEnum {
   internetAndTv = "internetAndTv",
   internetAndPhone = "internetAndPhone",
-  noBundle = "noBundle",
 }
 
 export const BUNDLES = {
-  [BundlesEnum.internetAndTv]: {
-    items: ["phone", "decoder"],
-  },
-  [BundlesEnum.internetAndPhone]: {
-    items: ["tv", "decoder"],
-  },
-  [BundlesEnum.noBundle]: { items: ["internet", "tv", "decoder", "phone"] },
-} as const;
+  [BundlesEnum.internetAndTv]: ["internet", "tv"],
+  [BundlesEnum.internetAndPhone]: ["internet", "phone"],
+} as Record<BundlesEnum, ServicesEnum[]>;
+
+export enum ServicesEnum {
+  internet = "internet",
+  tv = "tv",
+  phone = "phone",
+  decoder = "decoder",
+}
+export const SERVICES = [
+  "internet",
+  "phone",
+  "tv",
+  "decoder",
+] as ServicesEnum[];
 
 export const PRICES = {
   2023: {
@@ -49,6 +56,9 @@ export const PRICES = {
     phone: 29,
     decoder: 29,
   },
-} as const;
+} as Record<
+  number,
+  Record<ServicesEnum | Exclude<BundlesEnum, "noBundle">, number>
+>;
 
 export const DEFAULT_YEAR = 2023;

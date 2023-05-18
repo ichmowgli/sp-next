@@ -1,90 +1,139 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { create } from "zustand";
-import { PRICES, DEFAULT_YEAR, BundlesEnum } from "./constants";
+import {
+  PRICES,
+  DEFAULT_YEAR,
+  type BundlesEnum,
+  ServicesEnum,
+  BUNDLES,
+} from "./constants";
 
 export type Store = {
   selectedYear: keyof typeof PRICES;
-  selectedItems: Record<BundlesEnum, string[]>;
-  selectedBundle: BundlesEnum;
-  selectBundle: (bundle: BundlesEnum) => void;
-  totalPrice: (bundle: BundlesEnum) => number;
+  selectedItems: ServicesEnum[];
+  totalPrice: () => number;
+  getActiveBundle: () => BundlesEnum | null;
+  getActiveBundlePrice: () => number;
+  getActiveDiscount: () => number;
+
   selectYear: (year: keyof typeof PRICES) => void;
 
-  isSelected: (bundle: BundlesEnum, item: string) => boolean;
+  isSelected: (item: ServicesEnum) => boolean;
 
-  addService: (bundle: BundlesEnum, item: string) => void;
-  removeService: (bundle: BundlesEnum, item: string) => void;
-  canAdd: (bundle: BundlesEnum, item: string) => boolean;
-  hasTVItem: (bundle: BundlesEnum) => boolean;
+  addService: (item: ServicesEnum) => void;
+  removeService: (item: string) => void;
+  canAdd: (item: string) => boolean;
+  hasTVItem: () => boolean;
 };
 
 export const useCalcStore = create<Store>((set, get) => ({
-  selectedItems: {
-    internetAndTv: [],
-    internetAndPhone: [],
-    noBundle: [],
-  },
+  selectedItems: [],
   selectedYear: DEFAULT_YEAR,
-  selectedBundle: BundlesEnum.noBundle,
 
-  selectBundle: (bundle) => set({ selectedBundle: bundle }),
-
-  isSelected: (bundle, item) => {
-    return get().selectedItems[bundle].includes(item);
+  isSelected: (item) => {
+    return get().selectedItems.includes(item);
   },
 
-  addService: (bundle, item) => {
-    if (get().selectedItems[bundle].includes(item)) {
+  addService: (item) => {
+    if (get().isSelected(item)) {
       return;
     }
 
-    const selectedItems = get().selectedItems;
-    selectedItems[bundle].push(item);
-    return set({ selectedItems });
+    return set({ selectedItems: get().selectedItems.concat(item) });
   },
 
-  removeService: (bundle, item) => {
+  removeService: (item) => {
     const toRemove = [item];
 
     if (item === "tv") {
       toRemove.push("decoder");
     }
 
-    const selectedItems = get().selectedItems;
-    selectedItems[bundle] = selectedItems[bundle].filter(
-      (i) => !toRemove.includes(i)
-    );
-
-    return set({ selectedItems });
+    return set({
+      selectedItems: get().selectedItems.filter((i) => !toRemove.includes(i)),
+    });
   },
 
-  canAdd: (bundle, item) => {
-    if (item === "decoder" && !get().hasTVItem(bundle)) {
+  canAdd: (item) => {
+    if (item === "decoder" && !get().hasTVItem()) {
       return false;
     }
 
     return true;
   },
 
-  hasTVItem: (bundle) => {
-    return (
-      get().selectedItems[bundle].includes("tv") || bundle == "internetAndTv"
-    );
+  hasTVItem: () => {
+    return get().selectedItems.includes(ServicesEnum.tv);
   },
 
-  totalPrice: (bundle) => {
+  getActiveBundle: () => {
+    const possibleBundles = Object.keys(BUNDLES).filter((bundle) => {
+      const bundleItems = BUNDLES[bundle as keyof typeof BUNDLES];
+      return bundleItems.every((item) => get().selectedItems.includes(item));
+    }) as BundlesEnum[];
+
+    if (possibleBundles.length === 0) {
+      return null;
+    }
+
+    const pricesForYear = PRICES[get().selectedYear];
+    if (!pricesForYear) return null;
+
+    const sortedByPrice = possibleBundles.sort(
+      (a, b) => pricesForYear[a] - pricesForYear[b]
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return sortedByPrice[0]!;
+  },
+
+  getActiveDiscount: () => {
+    const bundle = get().getActiveBundle();
+    if (!bundle) return 0;
+
+    const pricesForYear = PRICES[get().selectedYear];
+    if (!pricesForYear) return 0;
+
+    const totalPriceWithoutBundle = get().selectedItems.reduce<number>(
+      (acc, item) => {
+        return acc + pricesForYear[item];
+      },
+      0
+    );
+
+    return totalPriceWithoutBundle - get().totalPrice();
+  },
+
+  getActiveBundlePrice: () => {
+    const bundle = get().getActiveBundle();
+    if (!bundle) return 0;
+
+    const pricesForYear = PRICES[get().selectedYear];
+    if (!pricesForYear) return 0;
+
+    return pricesForYear[bundle];
+  },
+
+  totalPrice: () => {
     const selectedYear = get().selectedYear;
     const pricesForThisYear = PRICES[selectedYear];
-    const bundlePrice = bundle !== "noBundle" ? pricesForThisYear[bundle] : 0;
 
-    return get().selectedItems[bundle].reduce<number>(
-      (acc: number, item: string) => {
-        const p = pricesForThisYear[item as keyof typeof pricesForThisYear];
-        return acc + p;
-      },
-      bundlePrice
+    if (!pricesForThisYear) return 0;
+
+    const bundle = get().getActiveBundle();
+    const bundlePrice = get().getActiveBundlePrice();
+
+    const freeItems = bundle ? BUNDLES[bundle] : [];
+
+    const paidItems = get().selectedItems.filter(
+      (item) => !freeItems.includes(item)
     );
+
+    return paidItems.reduce<number>((acc: number, item: string) => {
+      const p = pricesForThisYear[item as keyof typeof pricesForThisYear];
+      return acc + p;
+    }, bundlePrice);
   },
 
   selectYear: (year) => set({ selectedYear: year }),
