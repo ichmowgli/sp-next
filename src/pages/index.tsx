@@ -9,7 +9,7 @@ import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import { useCalcStore } from "@/lib/store";
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useEffect, type ReactNode, useState, Suspense } from "react";
+import { useEffect, type ReactNode, useState } from "react";
 import dynamic from "next/dynamic";
 import { type Prices, type ServicesEnum } from "@/lib/types";
 import { SERVICES, LABELS } from "@/lib/constants";
@@ -139,6 +139,7 @@ const Home: NextPage = () => {
     if (shouldLoad) {
       void store.saturatePrices().then(() => setShouldLoad(false));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

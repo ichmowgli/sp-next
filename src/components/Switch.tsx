@@ -1,4 +1,4 @@
-import { type ServicesEnum } from "@/lib/constants";
+import { type ServicesEnum } from "@/lib/types";
 import { useCalcStore } from "@/lib/store";
 import { Switch } from "./ui/switch";
 
